@@ -187,6 +187,7 @@ fun MapScreenWithLocation(isDarkMode: Boolean) {
                 Button(
                     onClick = {
                         Toast.makeText(context, "Posizione salvata!", Toast.LENGTH_SHORT).show()
+
                     },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
