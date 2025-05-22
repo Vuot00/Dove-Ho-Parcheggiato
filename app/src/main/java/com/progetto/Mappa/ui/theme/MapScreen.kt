@@ -177,7 +177,7 @@ fun MapScreenWithLocation(isDarkMode: Boolean) {
                     },
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(16.dp)
+                        .padding(horizontal = 14.dp, vertical = 30.dp)
                         .background(Color.White, CircleShape)
                 ) {
                     Icon(Icons.Default.GpsFixed, contentDescription = "Centra posizione")
