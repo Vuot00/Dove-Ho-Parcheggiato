@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -182,6 +183,21 @@ fun MapScreenWithLocation(isDarkMode: Boolean) {
                 ) {
                     Icon(Icons.Default.GpsFixed, contentDescription = "Centra posizione")
                 }
+
+                Button(
+                    onClick = {
+                        Toast.makeText(context, "Posizione salvata!", Toast.LENGTH_SHORT).show()
+                    },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(horizontal = 16.dp, vertical = 50.dp)
+                        .fillMaxWidth()
+                ) {
+                    Text("Salva posizione")
+                }
+
+
+
             }
 
             else -> {
