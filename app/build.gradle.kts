@@ -67,5 +67,8 @@ dependencies {
     implementation (libs.maps.compose)
     implementation (libs.play.services.maps)
     implementation (libs.play.services.location)
+    implementation("androidx.compose.material:material-icons-extended:1.6.1")
+
+
 
 }

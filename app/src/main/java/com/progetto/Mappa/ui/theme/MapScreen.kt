@@ -4,39 +4,31 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
-import android.util.Log // <--- AGGIUNGI QUESTO IMPORT
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.GpsFixed
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
+import com.google.android.gms.location.*
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.MapUiSettings
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
-import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.android.compose.*
+import kotlinx.coroutines.launch
 
-const val LOCATION_DEBUG_TAG = "LocationTracking" // Tag per i log
+
+const val LOCATION_DEBUG_TAG = "LocationTracking"
 private const val DEFAULT_MAP_ZOOM = 17f
-private val FALLBACK_INITIAL_LOCATION = LatLng(0.0, 0.0)
 
 @SuppressLint("MissingPermission")
 @Composable
@@ -46,171 +38,102 @@ fun MapScreenWithLocation(isDarkMode: Boolean) {
 
     var currentLocation by remember { mutableStateOf<LatLng?>(null) }
     var showPermissionRationale by remember { mutableStateOf(false) }
-    var locationUpdatesActive by remember { mutableStateOf(false) }
+    var permissionGranted by remember { mutableStateOf(false) }
+    var loading by remember { mutableStateOf(true) }
 
-    fun hasLocationPermission(): Boolean {
-        val permissionCheck = ContextCompat.checkSelfPermission(
+    val coroutineScope = rememberCoroutineScope()
+
+    fun checkPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
-        Log.d(LOCATION_DEBUG_TAG, "hasLocationPermission: $permissionCheck")
-        return permissionCheck
     }
-
-    var permissionGranted by remember { mutableStateOf(hasLocationPermission()) }
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { granted ->
-            Log.d(LOCATION_DEBUG_TAG, "Permission result: $granted")
             permissionGranted = granted
-            if (granted) {
-                locationUpdatesActive = true
-                Log.d(LOCATION_DEBUG_TAG, "Permission GRANTED, locationUpdatesActive set to true")
-            } else {
-                showPermissionRationale = true
-                Log.d(LOCATION_DEBUG_TAG, "Permission DENIED, showPermissionRationale set to true")
-            }
+            showPermissionRationale = !granted
         }
     )
+
+    LaunchedEffect(Unit) {
+        permissionGranted = checkPermission()
+        if (!permissionGranted) {
+            locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+    }
 
     val locationCallback = remember {
         object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
-                Log.d(LOCATION_DEBUG_TAG, "onLocationResult CALLED") // <--- LOG IMPORTANTE
-                if (locationResult.locations.isNotEmpty()) { // Controlla se la lista non è vuota
-                    val latestLocation =
-                        locationResult.locations.last() // Prendi l'ultima (o la prima, se preferisci)
-                    Log.d(
-                        LOCATION_DEBUG_TAG,
-                        "Location received: Lat ${latestLocation.latitude}, Lng ${latestLocation.longitude}, Accuracy: ${latestLocation.accuracy}"
-                    )
-                    currentLocation = LatLng(latestLocation.latitude, latestLocation.longitude)
-                    // Considera di fermare gli aggiornamenti se ti serve solo una posizione
-                    // fusedLocationClient.removeLocationUpdates(this)
-                    // locationUpdatesActive = false
-                    // Log.d(LOCATION_DEBUG_TAG, "Stopping location updates after first fix.")
-                } else {
-                    Log.d(LOCATION_DEBUG_TAG, "onLocationResult: locationResult.locations is EMPTY")
-                }
-
-                // Codice originale che usava lastLocation (può essere nullo anche se locations ha elementi)
-                locationResult.lastLocation?.let { location ->
-                    Log.d(
-                        LOCATION_DEBUG_TAG,
-                        "locationResult.lastLocation is NOT NULL: Lat ${location.latitude}, Lng ${location.longitude}"
-                    )
-                    // Non sovrascrivere se abbiamo già preso da locationResult.locations
-                    // currentLocation = LatLng(location.latitude, location.longitude)
-                } ?: run {
-                    Log.d(
-                        LOCATION_DEBUG_TAG,
-                        "onLocationResult: locationResult.lastLocation is NULL"
-                    )
+                val latest = locationResult.lastLocation
+                if (latest != null) {
+                    currentLocation = LatLng(latest.latitude, latest.longitude)
+                    loading = false
                 }
             }
         }
     }
 
-    LaunchedEffect(permissionGranted, locationUpdatesActive) {
-        Log.d(
-            LOCATION_DEBUG_TAG,
-            "LaunchedEffect triggered. PermissionGranted: $permissionGranted, LocationUpdatesActive: $locationUpdatesActive"
-        )
-        if (permissionGranted && locationUpdatesActive) {
-            val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000L)
-                .setMinUpdateIntervalMillis(5000L)
+    LaunchedEffect(permissionGranted) {
+        if (permissionGranted) {
+            val request = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000)
+                .setMinUpdateIntervalMillis(2000)
                 .build()
-            try {
-                Log.d(LOCATION_DEBUG_TAG, "Attempting to request location updates...")
-                fusedLocationClient.requestLocationUpdates(
-                    locationRequest,
-                    locationCallback,
-                    context.mainLooper
-                )
-                Log.d(LOCATION_DEBUG_TAG, "requestLocationUpdates SUCCEEDED")
-            } catch (e: SecurityException) {
-                Log.e(LOCATION_DEBUG_TAG, "SecurityException requesting updates: ${e.message}", e)
-                permissionGranted = false // Assicurati che lo stato sia corretto
-            } catch (e: Exception) {
-                Log.e(LOCATION_DEBUG_TAG, "Generic Exception requesting updates: ${e.message}", e)
-            }
-        } else if (!locationUpdatesActive) {
-            Log.d(
-                LOCATION_DEBUG_TAG,
-                "LaunchedEffect: Conditions not met or updates explicitly stopped. Removing updates."
+
+            fusedLocationClient.requestLocationUpdates(
+                request,
+                locationCallback,
+                context.mainLooper
             )
-            fusedLocationClient.removeLocationUpdates(locationCallback)
+
+            // fallback timeout se la posizione non arriva
+            coroutineScope.launch {
+                kotlinx.coroutines.delay(10000)
+                if (currentLocation == null) {
+                    loading = false
+                }
+            }
         }
     }
 
     DisposableEffect(Unit) {
         onDispose {
-            Log.d(
-                LOCATION_DEBUG_TAG,
-                "DisposableEffect: onDispose CALLED. Removing location updates."
-            )
             fusedLocationClient.removeLocationUpdates(locationCallback)
-            locationUpdatesActive = false
         }
     }
-
-    // Log per lo stato corrente prima del when
-    Log.d(
-        LOCATION_DEBUG_TAG,
-        "UI State Check: permissionGranted=$permissionGranted, currentLocation=$currentLocation, showPermissionRationale=$showPermissionRationale"
-    )
 
     Box(modifier = Modifier.fillMaxSize()) {
         when {
             !permissionGranted -> {
-                Log.d(LOCATION_DEBUG_TAG, "UI State: NOT PERMISSION GRANTED")
-                // ... (resto del codice per il caso !permissionGranted)
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Text("L'app ha bisogno del permesso di localizzazione.")
                     if (showPermissionRationale) {
-                        Text(
-                            "L'accesso alla posizione è necessario per mostrare la tua posizione sulla mappa.",
-                            modifier = Modifier.padding(16.dp)
-                        )
                         Button(onClick = {
                             val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                             val uri = Uri.fromParts("package", context.packageName, null)
                             intent.data = uri
                             context.startActivity(intent)
-                            showPermissionRationale = false
                         }) {
                             Text("Apri Impostazioni")
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
+                    } else {
                         Button(onClick = {
                             locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-                            showPermissionRationale = false
                         }) {
-                            Text("Riprova a concedere il permesso")
-                        }
-
-                    } else {
-                        Button(
-                            onClick = {
-                                Log.d(
-                                    LOCATION_DEBUG_TAG,
-                                    "Button 'Concedi permesso' clicked. Launching permission request."
-                                )
-                                locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-                            }
-                        ) {
-                            Text("Concedi permesso localizzazione")
+                            Text("Concedi permesso")
                         }
                     }
                 }
             }
 
-            currentLocation == null -> {
-                Log.d(LOCATION_DEBUG_TAG, "UI State: CURRENT LOCATION IS NULL (Loading...)")
+            loading -> {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
@@ -222,103 +145,50 @@ fun MapScreenWithLocation(isDarkMode: Boolean) {
                 }
             }
 
-            else -> {
-                Log.d(
-                    LOCATION_DEBUG_TAG,
-                    "UI State: CURRENT LOCATION AVAILABLE - SHOWING MAP. Actual currentLocation: $currentLocation"
-                )
-
-                // Anche se siamo in questo blocco 'else', è buona norma gestire la nullabilità
-                // nel caso in cui `currentLocation` cambi stato molto rapidamente durante la ricomposizione.
-                // Tuttavia, dato il `when` precedente, `currentLocation` qui NON DOVREBBE essere null.
-                // Usiamo `currentLocation!!` qui con la consapevolezza che il when lo ha già verificato.
-                // Se preferisci una sicurezza aggiuntiva, potresti usare `currentLocation ?: FALLBACK_INITIAL_LOCATION`
-                // ma idealmente non dovrebbe essere necessario se la logica del when è corretta.
-                val initialMapLocation = currentLocation!!
-
+            currentLocation != null -> {
                 val cameraPositionState = rememberCameraPositionState {
-                    position = CameraPosition.fromLatLngZoom(initialMapLocation, DEFAULT_MAP_ZOOM)
-                }
-
-                // Effetto per animare la camera quando `currentLocation` cambia
-                LaunchedEffect(currentLocation) {
-                    // `currentLocation` qui potrebbe essere cambiato da quando `cameraPositionState` è stato inizializzato
-                    // o potrebbe essere la stessa istanza se questo è il primo avvio dell'effetto con una posizione valida.
-                    currentLocation?.let { newLocation ->
-                        Log.d(LOCATION_DEBUG_TAG, "Map Camera Animate: New location $newLocation")
-
-                        // Controlla se la posizione è effettivamente cambiata prima di animare
-                        // per evitare animazioni non necessarie se `currentLocation` emette lo stesso valore.
-                        // Questo controllo è opzionale e dipende da quanto spesso `currentLocation` potrebbe aggiornarsi
-                        // con valori identici. Per `LatLng` è buona norma confrontare i valori.
-                        val currentCameraTarget = cameraPositionState.position.target
-                        if (currentCameraTarget.latitude != newLocation.latitude ||
-                            currentCameraTarget.longitude != newLocation.longitude ||
-                            cameraPositionState.position.zoom != DEFAULT_MAP_ZOOM
-                        ) { // Controlla anche lo zoom se vuoi resettarlo
-
-                            cameraPositionState.animate(
-                                update = com.google.android.gms.maps.CameraUpdateFactory.newCameraPosition(
-                                    CameraPosition(
-                                        newLocation,
-                                        DEFAULT_MAP_ZOOM,
-                                        0f,
-                                        0f
-                                    ) // tilt e bearing a 0
-                                ),
-                                durationMs = 1000 // Durata dell'animazione in millisecondi
-                            )
-                        } else {
-                            Log.d(
-                                LOCATION_DEBUG_TAG,
-                                "Map Camera: Position $newLocation is already set. Skipping animation."
-                            )
-                        }
-                    } ?: run {
-                        // Questo blocco viene eseguito se `currentLocation` diventa `null`
-                        // dopo essere stato non-null. Potrebbe non essere uno scenario previsto
-                        // se la logica generale mantiene la mappa visibile solo con una posizione valida.
-                        Log.d(
-                            LOCATION_DEBUG_TAG,
-                            "Map Camera: Current location became null after initial setup."
-                        )
-                    }
-                }
-
-                // Qui il resto del codice per GoogleMap, Marker, ecc.
-                // Ad esempio:
-                val mapProperties = MapProperties(
-                    isMyLocationEnabled = true,
-                    // Altre proprietà...
-                )
-                val uiSettings = remember {
-                    MapUiSettings(
-                        zoomControlsEnabled = true,
-                        myLocationButtonEnabled = true
-                        // Altre impostazioni UI...
-                    )
+                    position = CameraPosition.fromLatLngZoom(currentLocation!!, DEFAULT_MAP_ZOOM)
                 }
 
                 GoogleMap(
                     modifier = Modifier.fillMaxSize(),
                     cameraPositionState = cameraPositionState,
-                    properties = mapProperties,
-                    uiSettings = uiSettings,
-                    onMapLoaded = {
-                        Log.d(LOCATION_DEBUG_TAG, "GoogleMap: onMapLoaded CALLED")
-                        // ... (logica aggiuntiva se necessaria quando la mappa è caricata)
-                    }
+                    properties = MapProperties(isMyLocationEnabled = true),
+                    uiSettings = MapUiSettings(
+                        zoomControlsEnabled = false,
+                        myLocationButtonEnabled = false
+                    )
                 ) {
-                    // Il Marker dovrebbe anche usare `initialMapLocation` o `currentLocation` in modo sicuro.
-                    // Dato che siamo in questo blocco, `currentLocation` (e quindi `initialMapLocation`)
-                    // non dovrebbe essere null.
                     Marker(
-                        state = MarkerState(position = initialMapLocation),
-                        title = "Sei qui",
-                        snippet = "La tua posizione attuale"
+                        state = MarkerState(position = currentLocation!!),
+                        title = "Posizione Auto",
+                        snippet = "La tua auto è qui"
                     )
                 }
+
+                IconButton(
+                    onClick = {
+                        coroutineScope.launch {
+                            cameraPositionState.animate(
+                                update = CameraUpdateFactory.newLatLngZoom(currentLocation!!, DEFAULT_MAP_ZOOM),
+                                durationMs = 1000
+                            )
+                        }
+                    },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(16.dp)
+                        .background(Color.White, CircleShape)
+                ) {
+                    Icon(Icons.Default.GpsFixed, contentDescription = "Centra posizione")
+                }
+            }
+
+            else -> {
+                // caso raro: posizione nulla ma non in caricamento
+                Text("Impossibile determinare la posizione.")
             }
         }
     }
 }
+

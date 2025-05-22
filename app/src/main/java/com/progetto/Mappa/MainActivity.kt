@@ -37,20 +37,18 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // --- QUI: Controllo permesso ---
+        // Nasconde l'Action Bar
+        supportActionBar?.hide()
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED) {
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-        } else {
-            // Hai già il permesso: puoi loggare o fare azioni extra se serve
         }
 
-        // --- QUI: UI app ---
         setContent {
             MappaTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) {
                     val isDark = isSystemInDarkTheme()
-                    // Change MapScreen to MapScreenWithLocation here
                     MapScreenWithLocation(isDarkMode = isDark)
                 }
             }
@@ -59,6 +57,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map_fragment) as? SupportMapFragment
         mapFragment?.getMapAsync(this)
     }
+
 
     override fun onMapReady(map: GoogleMap) {
         TODO("Not yet implemented")
