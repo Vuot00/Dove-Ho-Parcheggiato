@@ -9,27 +9,29 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Scaffold
-import androidx.compose.ui.Modifier
-import androidx.core.content.ContextCompat
-import com.google.android.gms.maps.SupportMapFragment
-import com.progetto.Mappa.ui.theme.MappaTheme
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import com.progetto.Mappa.ui.theme.MappaTheme
 
-class MainActivity : AppCompatActivity(), OnMapReadyCallback {
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var permissionState: MutableState<Boolean>
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
-        if (isGranted) {
-            // Permesso concesso, aggiorna UI o avvia localizzazione
-        } else {
-            // Permesso negato, magari mostra messaggio
-        }
+        permissionState.value = isGranted
     }
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -40,28 +42,39 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         // Nasconde l'Action Bar
         supportActionBar?.hide()
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED) {
-            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-        }
+        permissionState = mutableStateOf(
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        )
 
         setContent {
             MappaTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) {
-                    val isDark = isSystemInDarkTheme()
-                    MapScreenWithLocation(isDarkMode = isDark)
+                    if (permissionState.value) {
+                        MapScreenWithLocation(isDarkMode = isSystemInDarkTheme())
+                    } else {
+                        RequestLocationPermissionScreen {
+                            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                        }
+                    }
                 }
             }
         }
-
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.map_fragment) as? SupportMapFragment
-        mapFragment?.getMapAsync(this)
-    }
-
-
-    override fun onMapReady(map: GoogleMap) {
-        TODO("Not yet implemented")
     }
 }
 
-
+@Composable
+fun RequestLocationPermissionScreen(onRequestPermission: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 10.dp, vertical = 50.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Button(onClick = onRequestPermission) {
+            Text("L'app ha bisogno dei permessi di localizzazione")
+        }
+    }
+}
