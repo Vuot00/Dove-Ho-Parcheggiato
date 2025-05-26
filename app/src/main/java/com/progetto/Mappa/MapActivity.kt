@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
 
 class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
+    // ######################################## VARIABILI ########################################
     private lateinit var googleMap: GoogleMap
     private lateinit var db: AppDatabase
 
@@ -30,6 +31,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         LocationServices.getFusedLocationProviderClient(this)
     }
 
+    // ######################################## UI IMMERSIVA ########################################
     private fun hideSystemUI() {
         window.decorView.systemUiVisibility = (
                 View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
@@ -41,34 +43,35 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 )
     }
 
+    // ######################################## ONCREATE PRINCIPALE ########################################
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
-
         supportActionBar?.hide()
         hideSystemUI()
 
+        // Inizializza DB
         db = AppDatabase.getInstance(applicationContext)
 
+        // Inizializza mappa
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map_fragment) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        val actionButton: Button = findViewById(R.id.custom_action_button)
-
+        // ######################################## BOTTONE BUSSOLA ########################################
         val compassButton: ImageButton = findViewById(R.id.my_bussolina)
         compassButton.setOnClickListener {
             val currentCameraPosition = googleMap.cameraPosition
-
             val newCameraPosition = com.google.android.gms.maps.model.CameraPosition.Builder(currentCameraPosition)
                 .bearing(0f) // sempre nord
                 .tilt(0f)    // resetta anche l'inclinazione
                 .build()
-
             googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(newCameraPosition))
         }
 
+        // ######################################## BOTTONE SALVA POSIZIONE ########################################
+        val actionButton: Button = findViewById(R.id.custom_action_button)
         actionButton.setOnClickListener {
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 if (location != null) {
@@ -78,7 +81,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                         MarkerOptions().position(currentLatLng).title(getString(R.string.posizione_auto))
                     )
 
-                    // Salva nel database
+                    // Salva nel database Room
                     CoroutineScope(Dispatchers.IO).launch {
                         db.savedLocationDao().insertLocation(
                             SavedLocation(latitude = location.latitude, longitude = location.longitude)
@@ -91,6 +94,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    // ######################################## FULLSCREEN SEMPRE ATTIVO ########################################
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) {
@@ -98,6 +102,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    // ######################################## CALLBACK MAPPA PRONTA ########################################
     @SuppressLint("MissingPermission")
     override fun onMapReady(map: GoogleMap) {
         googleMap = map
@@ -107,16 +112,16 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         googleMap.uiSettings.isCompassEnabled = false
         googleMap.uiSettings.isRotateGesturesEnabled = true
 
-
-
+        // Centra sulla posizione attuale
         centerMapOnUserLocation()
 
+        // ######################################## BOTTONE POSIZIONE UTENTE ########################################
         val myLocationButton: ImageButton = findViewById(R.id.my_location_button)
         myLocationButton.setOnClickListener {
             centerMapOnUserLocation()
         }
 
-        // Carica posizione salvata e mostra marker
+        // ######################################## CARICA POSIZIONE SALVATA ########################################
         CoroutineScope(Dispatchers.IO).launch {
             val saved = db.savedLocationDao().getLocation()
             saved?.let {
@@ -131,6 +136,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    // ######################################## CENTRA MAPPA SU POSIZIONE ATTUALE ########################################
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     private fun centerMapOnUserLocation() {
         fusedLocationClient.lastLocation.addOnSuccessListener { location ->
