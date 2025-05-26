@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Dove ho parcheggiato?</string>
+    <string name="centra_la_posizione">Centra la posizione</string>
+    <string name="salva_posizione_auto">Salva posizione auto</string>
 </resources>
