@@ -45,5 +45,14 @@
         android:text="@string/salva_posizione_auto"
         android:textAllCaps="false"
         android:textColor="@android:color/white" />
+
+    <Spinner
+        android:id="@+id/language_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:spinnerMode="dropdown" />
+
+
 </FrameLayout>
 

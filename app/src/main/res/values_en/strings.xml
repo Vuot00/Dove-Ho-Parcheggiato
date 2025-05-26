@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <string name="app_name">Where have I parked?</string>
+    <string name="centra_la_posizione">Center the position</string>
+    <string name="salva_posizione_auto">Save auto position</string>
+    <string name="language_button">Language</string>
+    <string name="permessi_localizzazione">The app needs the location permission.</string>
+</resources>

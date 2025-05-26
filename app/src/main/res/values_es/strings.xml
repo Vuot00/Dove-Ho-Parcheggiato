@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <string name="app_name">¿Dónde me aparqué?</string>
+    <string name="centra_la_posizione">Centra la posición</string>
+    <string name="salva_posizione_auto">Guardar posición del coche</string>
+    <string name="language_button">Idioma</string>
+    <string name="permessi_localizzazione">La app necesita el permiso de ubicación.</string>
+</resources>

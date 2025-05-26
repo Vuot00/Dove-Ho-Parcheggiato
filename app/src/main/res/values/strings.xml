@@ -1,5 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+
 <resources>
     <string name="app_name">Dove ho parcheggiato?</string>
     <string name="centra_la_posizione">Centra la posizione</string>
     <string name="salva_posizione_auto">Salva posizione auto</string>
+    <string name="language_button">Lingua</string>
+    <string name="permessi_localizzazione">L\'app ha bisogno del permesso di localizzazione.</string>
 </resources>
