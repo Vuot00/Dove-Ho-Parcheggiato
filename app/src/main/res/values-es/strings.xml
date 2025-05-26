@@ -6,4 +6,7 @@
     <string name="salva_posizione_auto">Guardar posición del coche</string>
     <string name="language_button">Idioma</string>
     <string name="permessi_localizzazione">La app necesita el permiso de ubicación.</string>
+    <string name="posizione_salvata">Posición guardada!</string>
+    <string name="posizione_auto">Tu coche está aquí!</string>
+    <string name="auto_parcheggiata">Coche parchejado!</string>
 </resources>

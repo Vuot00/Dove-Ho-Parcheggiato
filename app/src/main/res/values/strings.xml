@@ -6,4 +6,7 @@
     <string name="salva_posizione_auto">Salva posizione auto</string>
     <string name="language_button">Lingua</string>
     <string name="permessi_localizzazione">L\'app ha bisogno del permesso di localizzazione.</string>
+    <string name="posizione_salvata">Posizione salvata!</string>
+    <string name="posizione_auto">La tua auto è qui!</string>
+    <string name="auto_parcheggiata">Auto parcheggiata!</string>
 </resources>

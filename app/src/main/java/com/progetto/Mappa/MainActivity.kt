@@ -78,10 +78,10 @@ class MainActivity : AppCompatActivity() {
         Box(modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
-            contentAlignment = Alignment.TopEnd
+            contentAlignment = Alignment.TopStart
         ) {
             Button(onClick = { expanded = true }) {
-                Text("🌐 " + stringResource(id = R.string.language_button))  // Usa stringhe localizzate
+                Text("🌐 " + stringResource(id = R.string.language_button))
             }
 
             DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {

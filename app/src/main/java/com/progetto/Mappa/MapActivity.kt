@@ -9,6 +9,7 @@ import android.widget.ImageButton
 import android.widget.Toast
 import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.res.stringResource
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -74,7 +75,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                     val currentLatLng = LatLng(location.latitude, location.longitude)
                     googleMap.clear()
                     googleMap.addMarker(
-                        MarkerOptions().position(currentLatLng).title("La tua auto è qui!")
+                        MarkerOptions().position(currentLatLng).title(getString(R.string.posizione_auto))
                     )
 
                     // Salva nel database
@@ -84,7 +85,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                         )
                     }
 
-                    Toast.makeText(this, "Posizione salvata!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.posizione_salvata), Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -122,7 +123,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 val savedLatLng = LatLng(it.latitude, it.longitude)
                 runOnUiThread {
                     googleMap.addMarker(
-                        MarkerOptions().position(savedLatLng).title("Auto parcheggiata")
+                        MarkerOptions().position(savedLatLng).title(getString(R.string.auto_parcheggiata))
                     )
                     googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(savedLatLng, 17f))
                 }
