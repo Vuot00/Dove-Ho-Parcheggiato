@@ -13,13 +13,25 @@
         android:id="@+id/my_location_button"
         android:layout_width="56dp"
         android:layout_height="56dp"
-        android:layout_gravity="top|end"
+        android:layout_gravity="bottom|end"
         android:layout_marginEnd="24dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginBottom="100dp"
         android:background="@drawable/round_background"
-        android:src="@drawable/ic_gps_fixed"
+        android:contentDescription="Centra la posizione"
         android:scaleType="centerInside"
-        android:contentDescription="Centra la posizione" />
+        android:src="@drawable/ic_gps_fixed" />
+
+    <ImageButton
+        android:id="@+id/my_bussolina"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="37dp"
+        android:layout_marginBottom="180dp"
+        android:background="@drawable/round_background"
+        android:contentDescription="Bussolina"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_bussolina" />
 
     <Button
         android:id="@+id/custom_action_button"

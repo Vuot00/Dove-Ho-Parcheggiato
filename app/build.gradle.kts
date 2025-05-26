@@ -3,7 +3,13 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.map.secret)
+    id("org.jetbrains.kotlin.kapt")
+
+
+
 }
+
+
 
 android {
     namespace = "com.progetto.Mappa"
@@ -59,6 +65,8 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.fragment)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.room.common.jvm)
+    implementation(libs.androidx.room.runtime.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -74,6 +82,10 @@ dependencies {
     implementation (libs.play.services.maps)
     implementation (libs.play.services.location)
     implementation(libs.androidx.material.icons.extended)
+
+    implementation (libs.androidx.room.runtime)
+    kapt (libs.androidx.room.compiler)
+    implementation (libs.androidx.room.ktx)
 
 
 
