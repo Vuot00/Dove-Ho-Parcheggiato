@@ -5,7 +5,7 @@
     <string name="centra_la_posizione">Centra la posición</string>
     <string name="salva_posizione_auto">Guardar posición del coche</string>
     <string name="language_button">Idioma</string>
-    <string name="permessi_localizzazione">La aplicación necesita el permiso de localización para funcionar.</string>
+    <string name="permessi_localizzazione">La aplicación necesita el permiso de localización para funcionar correctamente.</string>
     <string name="posizione_salvata">Posición guardada!</string>
     <string name="posizione_auto">Tu coche está aquí!</string>
     <string name="auto_parcheggiata">Coche parchejado!</string>
