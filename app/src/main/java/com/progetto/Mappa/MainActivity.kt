@@ -1,26 +1,19 @@
 package com.progetto.Mappa
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.ComposeView
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.progetto.Mappa.ui.theme.MappaTheme
 import com.progetto.Mappa.ui.theme.components.LanguageMenuBox
-import java.util.*
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
@@ -37,52 +30,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     // ######################################## ONCREATE PRINCIPALE ########################################
-    /*
-==============================================
-🚀 COSA ABBIAMO CAMBIATO E PERCHÉ
-==============================================
-
-✅ 1. SPOSTATO IL CONTROLLO DEI PERMESSI PRIMA DEL setContent:
-   Prima, anche se i permessi erano già stati dati, la UI Compose veniva comunque mostrata per un istante
-   (in particolare il menu a tendina della lingua), creando un “flash” visivo fastidioso.
-
-   ➤ Ora controlliamo subito se i permessi sono già presenti. Se sì, lanciamo direttamente MapActivity
-     e chiudiamo MainActivity PRIMA di arrivare a setContent.
-
-✅ 2. Rimossa la variabile permissionState e usato direttamente il controllo di sistema.
-   Meno codice da gestire, e più immediato.
-
-✅ 3. Inserito requestPermissionLauncher dentro Compose usando rememberLauncherForActivityResult.
-   Così tutto il flusso dei permessi è gestito dentro Compose, più semplice e moderno.
-
-✅ 4. Organizzato il codice in sezioni commentate per chiarezza futura.
-
-==============================================
-🎯 RISULTATO
-==============================================
-✔️ Nessun lampeggiamento iniziale
-✔️ Cambio lingua con persistenza
-✔️ UI visibile solo se serve davvero chiedere il permesso
-
-*/
-
-    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         hideSystemUI()
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         supportActionBar?.hide()
+        super.onCreate(savedInstanceState)
 
-        // Applica lingua salvata prima di qualsiasi UI
+        // Applica lingua salvata prima della UI
         val lang = getSharedPreferences("settings", MODE_PRIVATE)
             .getString("language", "it") ?: "it"
         setLocale(lang)
 
         // ######################################## CONTROLLO PERMESSI IMMEDIATO ########################################
-        val hasPermission = ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
+        val permission = Manifest.permission.ACCESS_FINE_LOCATION
+        val hasPermission = ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
 
         if (hasPermission) {
             startActivity(Intent(this, MapActivity::class.java))
@@ -90,44 +50,56 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // ######################################## UI COMPOSABLE SOLO SE SERVE PERMESSO ########################################
-        setContent {
-            MappaTheme {
-                var currentLang by rememberSaveable {
-                    mutableStateOf(lang)
+        // ######################################## SET UI XML ########################################
+        setContentView(R.layout.activity_main)
+
+        val btnRequestPermission = findViewById<Button>(R.id.btn_request_permission)
+        val btnOpenSettings = findViewById<Button>(R.id.btn_open_settings)
+
+        // ######################################## CLICK SU "CONCEDI PERMESSO" ########################################
+        btnRequestPermission.setOnClickListener {
+            ActivityCompat.requestPermissions(this, arrayOf(permission), 100)
+        }
+
+        // ######################################## CLICK SU "APRI IMPOSTAZIONI" ########################################
+        btnOpenSettings.setOnClickListener {
+            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.fromParts("package", packageName, null)
+            }
+            startActivity(intent)
+        }
+
+        // ######################################## INSERISCI COMPOSABLE LANGUAGE MENU ########################################
+        val composeView = findViewById<ComposeView>(R.id.language_menu_compose)
+        composeView.setContent {
+            LanguageMenuBox(
+                currentLang = lang,
+                onLanguageSelected = { selectedLang ->
+                    saveLanguage(selectedLang)
+                    recreate() // riavvia l'Activity per applicare la nuova lingua
                 }
+            )
+        }
+    }
 
-                val requestPermissionLauncher = rememberLauncherForActivityResult(
-                    ActivityResultContracts.RequestPermission()
-                ) { isGranted ->
-                    if (isGranted) {
-                        startActivity(Intent(this, MapActivity::class.java))
-                        finish()
-                    }
-                }
+    // ######################################## GESTIONE RISULTATO PERMESSI ########################################
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 100) {
+            val permission = Manifest.permission.ACCESS_FINE_LOCATION
+            val granted = grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
 
-                Scaffold(modifier = Modifier.fillMaxSize()) {
-                    Box(modifier = Modifier.fillMaxSize()) {
-
-                        // MENU A TENDINA PER CAMBIO LINGUA
-                        LanguageMenuBox(
-                            currentLang = currentLang,
-                            onLanguageSelected = { langCode ->
-                                currentLang = langCode
-                                saveLanguage(langCode)
-                                setLocale(langCode)
-                                recreate()
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 12.dp, top = 16.dp)
-                        )
-
-                        // UI PER RICHIEDERE IL PERMESSO
-                        RequestLocationPermissionScreen {
-                            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-                        }
-                    }
+            if (granted) {
+                startActivity(Intent(this, MapActivity::class.java))
+                finish()
+            } else {
+                val shouldShow = ActivityCompat.shouldShowRequestPermissionRationale(this, permission)
+                if (!shouldShow) {
+                    findViewById<Button>(R.id.btn_open_settings).visibility = View.VISIBLE
                 }
             }
         }

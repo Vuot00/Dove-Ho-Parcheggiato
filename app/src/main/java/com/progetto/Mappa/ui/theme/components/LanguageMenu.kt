@@ -9,7 +9,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.progetto.Mappa.R
 
 // ######################################## MENU A TENDINA LINGUA ########################################
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,7 +41,7 @@ fun LanguageDropdownMenu(
         ) {
             Icon(Icons.Default.Public, contentDescription = null, tint = Color.White)
             Spacer(Modifier.width(8.dp))
-            Text("Lingua", color = Color.White)
+            Text(text = stringResource(id = R.string.language_button), color = Color.White)
         }
 
         // ######################################## MENU A DISCESA ########################################

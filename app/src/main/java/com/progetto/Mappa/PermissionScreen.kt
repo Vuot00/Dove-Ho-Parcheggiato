@@ -9,15 +9,32 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun RequestLocationPermissionScreen(onRequestPermission: () -> Unit) {
+fun RequestLocationPermissionScreen(
+    showSettingsButton: Boolean,
+    onRequestPermission: () -> Unit,
+    onOpenSettings: () -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
-        Button(onClick = onRequestPermission) {
-            Text(stringResource(id = R.string.permessi_localizzazione))
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(text = stringResource(id = R.string.permessi_localizzazione))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(onClick = onRequestPermission) {
+                Text(text = stringResource(id = R.string.concedi_permesso))
+            }
+
+            if (showSettingsButton) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Button(onClick = onOpenSettings) {
+                    Text(text = stringResource(id = R.string.apri_impostazioni))
+                }
+            }
         }
     }
 }
+
