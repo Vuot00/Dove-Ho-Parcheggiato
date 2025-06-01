@@ -11,6 +11,8 @@ import android.widget.Toast
 import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.res.stringResource
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -19,9 +21,11 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.navigation.NavigationView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+
 
 class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -46,7 +50,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     // ######################################## ONCREATE PRINCIPALE ########################################
-    @SuppressLint("MissingPermission")
+    @SuppressLint("MissingPermission", "MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
@@ -61,7 +65,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             .findFragmentById(R.id.map_fragment) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        // ######################################## BOTTONE BUSSOLA ########################################
+        // BOTTONE BUSSOLA
         val compassButton: ImageButton = findViewById(R.id.my_bussolina)
         compassButton.setOnClickListener {
             val currentCameraPosition = googleMap.cameraPosition
@@ -72,7 +76,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(newCameraPosition))
         }
 
-        // ######################################## BOTTONE SALVA POSIZIONE ########################################
+        // BOTTONE SALVA POSIZIONE
         val actionButton: Button = findViewById(R.id.custom_action_button)
         actionButton.setOnClickListener {
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
@@ -92,6 +96,31 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
                     Toast.makeText(this, getString(R.string.posizione_salvata), Toast.LENGTH_SHORT).show()
                 }
+            }
+        }
+
+        // BOTTONE MENU (3 puntini)
+        val drawerLayout = findViewById<DrawerLayout>(R.id.drawer_layout)
+        val navigationView = findViewById<NavigationView>(R.id.navigation_view)
+        val menuButton = findViewById<ImageButton>(R.id.menu_button)
+
+        menuButton.setOnClickListener {
+            drawerLayout.openDrawer(GravityCompat.START)
+        }
+
+        navigationView.setNavigationItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.voice_settings -> {
+                    Toast.makeText(this, "Impostazioni", Toast.LENGTH_SHORT).show()
+                    true
+                }
+                R.id.voice_about -> {
+                    Toast.makeText(this, "Info sull'app", Toast.LENGTH_SHORT).show()
+                    true
+                }
+                else -> false
+            }.also {
+                drawerLayout.closeDrawer(GravityCompat.START)
             }
         }
     }

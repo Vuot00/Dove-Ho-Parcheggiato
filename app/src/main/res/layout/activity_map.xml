@@ -1,53 +1,79 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/map_container"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <fragment
-        android:id="@+id/map_fragment"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
+    <!-- CONTENUTO PRINCIPALE: MAPPA + BOTTONI -->
+    <FrameLayout
+        android:id="@+id/map_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
 
-    <ImageButton
-        android:id="@+id/my_location_button"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="100dp"
-        android:background="@drawable/round_background"
-        android:contentDescription="Centra la posizione"
-        android:scaleType="centerInside"
-        android:src="@drawable/ic_gps_fixed" />
+        <!-- La mappa -->
+        <fragment
+            android:id="@+id/map_fragment"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
-    <ImageButton
-        android:id="@+id/my_bussolina"
-        android:layout_width="35dp"
-        android:layout_height="35dp"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="37dp"
-        android:layout_marginBottom="180dp"
-        android:background="@drawable/round_background"
-        android:contentDescription="Bussolina"
-        android:scaleType="centerInside"
-        android:src="@drawable/ic_bussolina" />
+        <ImageButton
+            android:id="@+id/my_location_button"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="100dp"
+            android:background="@drawable/round_background"
+            android:contentDescription="Centra la posizione"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_gps_fixed" />
 
-    <Button
-        android:id="@+id/custom_action_button"
-        android:layout_width="330dp"
-        android:layout_height="56dp"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="24dp"
-        android:background="@drawable/rounded_button"
-        android:backgroundTint="@color/purple_500"
-        android:contentDescription="Azione personalizzata"
-        android:text="@string/salva_posizione_auto"
-        android:textAllCaps="false"
-        android:textColor="@android:color/white" />
+        <ImageButton
+            android:id="@+id/my_bussolina"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="37dp"
+            android:layout_marginBottom="180dp"
+            android:background="@drawable/round_background"
+            android:contentDescription="Bussolina"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_bussolina" />
 
+        <Button
+            android:id="@+id/custom_action_button"
+            android:layout_width="330dp"
+            android:layout_height="56dp"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="24dp"
+            android:background="@drawable/rounded_button"
+            android:backgroundTint="@color/purple_500"
+            android:contentDescription="Azione personalizzata"
+            android:text="@string/salva_posizione_auto"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white" />
 
+        <!-- Pulsante per aprire il menu -->
+        <ImageButton
+            android:id="@+id/menu_button"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_gravity="top|start"
+            android:background="@drawable/round_background"
+            android:src="@drawable/piede"
+            android:contentDescription="Apri menu" />
+    </FrameLayout>
 
-
-</FrameLayout>
-
+    <!-- MENU LATERALE -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/navigation_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        android:background="@android:color/white"
+        app:menu="@menu/drawer_menu" />
+</androidx.drawerlayout.widget.DrawerLayout>
