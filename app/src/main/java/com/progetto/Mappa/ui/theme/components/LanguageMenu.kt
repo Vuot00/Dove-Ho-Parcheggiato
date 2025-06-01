@@ -34,7 +34,7 @@ fun LanguageDropdownMenu(
         Button(
             onClick = { expanded = true },
             shape = RoundedCornerShape(50),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3F51B5)),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EE)),
             modifier = Modifier
                 .padding(4.dp)
                 .height(40.dp)

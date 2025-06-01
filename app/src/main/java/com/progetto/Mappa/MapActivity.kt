@@ -3,6 +3,7 @@ package com.progetto.Mappa
 import android.Manifest
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
@@ -16,6 +17,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -106,6 +108,23 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     @SuppressLint("MissingPermission")
     override fun onMapReady(map: GoogleMap) {
         googleMap = map
+
+        // Applica lo stile in base al tema del sistema
+        val isDarkTheme = resources.configuration.uiMode and
+                android.content.res.Configuration.UI_MODE_NIGHT_MASK == android.content.res.Configuration.UI_MODE_NIGHT_YES
+
+        if (isDarkTheme) {
+            try {
+                val success = googleMap.setMapStyle(
+                    MapStyleOptions.loadRawResourceStyle(this, R.raw.map_dark_style)
+                )
+                if (!success) {
+                    Log.e("MapActivity", "Style parsing failed.")
+                }
+            } catch (e: Exception) {
+                Log.e("MapActivity", "Cannot load map style", e)
+            }
+        }
 
         googleMap.uiSettings.isMyLocationButtonEnabled = false
         googleMap.isMyLocationEnabled = true
