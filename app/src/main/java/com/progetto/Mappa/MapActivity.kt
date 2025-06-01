@@ -2,11 +2,14 @@ package com.progetto.Mappa
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
+import android.widget.PopupMenu
+import android.widget.Switch
 import android.widget.Toast
 import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
@@ -25,6 +28,8 @@ import com.google.android.material.navigation.NavigationView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.Locale
+import android.graphics.Color
 
 
 class MapActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -52,6 +57,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     // ######################################## ONCREATE PRINCIPALE ########################################
     @SuppressLint("MissingPermission", "MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
+        loadSavedLanguage()
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
         supportActionBar?.hide()
@@ -100,8 +107,13 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         // BOTTONE MENU (3 puntini)
+        val isDarkTheme = resources.configuration.uiMode and
+                Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
         val drawerLayout = findViewById<DrawerLayout>(R.id.drawer_layout)
         val navigationView = findViewById<NavigationView>(R.id.navigation_view)
+        navigationView.setBackgroundColor(
+            if (isDarkTheme) Color.parseColor("#162340") else Color.WHITE
+        )
         val menuButton = findViewById<ImageButton>(R.id.menu_button)
 
         menuButton.setOnClickListener {
@@ -110,12 +122,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
         navigationView.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
-                R.id.voice_settings -> {
-                    Toast.makeText(this, "Impostazioni", Toast.LENGTH_SHORT).show()
-                    true
-                }
                 R.id.voice_about -> {
                     Toast.makeText(this, "Info sull'app", Toast.LENGTH_SHORT).show()
+                    true
+                }
+                R.id.voice_language -> {
+                    showLanguagePopup(menuButton)
                     true
                 }
                 else -> false
@@ -123,7 +135,41 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 drawerLayout.closeDrawer(GravityCompat.START)
             }
         }
+
+        // GESTIONE SWITCH
+        val toggleItem = navigationView.menu.findItem(R.id.voice_toggle_option)
+        val toggleSwitch = toggleItem.actionView?.findViewById<Switch>(R.id.nav_switch)
+        toggleSwitch?.setOnCheckedChangeListener { _, isChecked ->
+            Toast.makeText(this, if (isChecked) "Attivato" else "Disattivato", Toast.LENGTH_SHORT).show()
+            // Salva stato o cambia comportamento se necessario
+        }
     }
+//######################################
+    private fun showLanguagePopup(anchorView: View) {
+        val popup = PopupMenu(this, anchorView)
+        popup.menu.add("Italiano")
+        popup.menu.add("English")
+        popup.menu.add("Español")
+
+
+        popup.setOnMenuItemClickListener { item ->
+            when (item.title) {
+                "Italiano" -> changeAppLanguage("it")
+                "English" -> changeAppLanguage("en")
+                "Español" -> changeAppLanguage("es")
+            }
+            true
+        }
+
+        popup.show()
+    }
+
+    private fun changeAppLanguage(languageCode: String) {
+        saveLanguage(languageCode)
+        setLocale(languageCode)
+        recreate()
+    }
+
 
     // ######################################## FULLSCREEN SEMPRE ATTIVO ########################################
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -193,5 +239,30 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 17f))
             }
         }
+
+    }
+    private fun loadSavedLanguage() {
+        val prefs = getSharedPreferences("settings", MODE_PRIVATE)
+        val languageCode = prefs.getString("language", "it") ?: "it" // default italiano
+        setLocale(languageCode)
+    }
+
+
+    // ######################################## SALVATAGGIO LINGUA ########################################
+    private fun saveLanguage(langCode: String) {
+        getSharedPreferences("settings", MODE_PRIVATE)
+            .edit()
+            .putString("language", langCode)
+            .apply()
+    }
+
+    // ######################################## CAMBIO LINGUA ########################################
+    private fun setLocale(languageCode: String) {
+        val locale = Locale(languageCode)
+        Locale.setDefault(locale)
+        val config = resources.configuration
+        config.setLocale(locale)
+        resources.updateConfiguration(config, resources.displayMetrics)
     }
 }
+

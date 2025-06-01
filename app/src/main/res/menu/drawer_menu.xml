@@ -1,7 +1,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+
     <item
-        android:id="@+id/voice_settings"
-        android:title="Impostazioni" />
+        android:id="@+id/voice_language"
+        android:title="Cambia lingua" />
+
+    <item
+        android:id="@+id/voice_toggle_option"
+        android:title="Modalità Bussola"
+        android:actionLayout="@layout/menu_toggle_switch"
+        android:checkable="false"/>
     <item
         android:id="@+id/voice_about"
         android:title="Info" />
