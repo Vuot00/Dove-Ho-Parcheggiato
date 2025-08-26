@@ -11,4 +11,9 @@
     <string name="auto_parcheggiata">Auto parcheggiata!</string>
     <string name="apri_impostazioni">Apri impostazioni</string>
     <string name="concedi_permesso">Concedi permesso</string>
+    <string name="cambia_lingua">Cambia lingua</string>
+    <string name="giroscopio">Giroscopio</string>
+    <string name="info"> Info</string>
+    <string name="informzaioni"> Info</string>
+
 </resources>

@@ -11,4 +11,9 @@
     <string name="auto_parcheggiata">Coche parchejado!</string>
     <string name="apri_impostazioni">Abrir configuración</string>
     <string name="concedi_permesso">Concedi permiso</string>
+    <string name="cambia_lingua">Cambiar idioma</string>
+    <string name="giroscopio">Giroscopio</string>
+    <string name="info"> Information</string>
+    <string name="informzaioni"> Information</string>
+
 </resources>

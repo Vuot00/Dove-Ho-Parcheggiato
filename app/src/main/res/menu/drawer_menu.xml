@@ -2,14 +2,14 @@
 
     <item
         android:id="@+id/voice_language"
-        android:title="Cambia lingua" />
+        android:title="@string/cambia_lingua" />
 
     <item
         android:id="@+id/voice_toggle_option"
-        android:title="Modalità Bussola"
+        android:title="@string/giroscopio"
         android:actionLayout="@layout/menu_toggle_switch"
         android:checkable="false"/>
     <item
         android:id="@+id/voice_about"
-        android:title="Info" />
+        android:title="@string/info" />
 </menu>
