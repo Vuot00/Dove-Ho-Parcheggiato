@@ -6,6 +6,9 @@
     <!-- Permessi di localizzazione -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+
 
     <application
         android:allowBackup="true"
@@ -40,6 +43,11 @@
             android:name=".MapActivity"
             android:exported="false"
             android:theme="@style/Theme.Mappa" />
+
+        <receiver
+            android:name=".MapActivity$NotificaReceiver"/>
+
+
     </application>
 
 </manifest>
