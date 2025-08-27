@@ -65,6 +65,7 @@
             android:background="@drawable/round_background"
             android:src="@drawable/piede"
             android:contentDescription="Apri menu" />
+
     </FrameLayout>
 
     <!-- MENU LATERALE -->

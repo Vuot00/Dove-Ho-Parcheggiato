@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.*
 import android.content.*
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
@@ -28,6 +29,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
+import android.provider.Settings
+import android.os.Handler
+import android.os.Looper
+
+
 
 class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -60,6 +66,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(R.layout.activity_map)
         supportActionBar?.hide()
         hideSystemUI()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1)
+            }
+        }
 
         // Inizializza DB
         db = AppDatabase.getInstance(applicationContext)
@@ -101,6 +113,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                                 MarkerOptions().position(currentLatLng)
                                     .title(getString(R.string.posizione_auto))
                             )
+                            Toast.makeText(this, getString(R.string.posizione_salvata), Toast.LENGTH_SHORT).show()
                         }
                         .show()
 
@@ -111,7 +124,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                         )
                     }
 
-                    Toast.makeText(this, getString(R.string.posizione_salvata), Toast.LENGTH_SHORT).show()
+
                 }
             }
         }
@@ -156,68 +169,68 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     // ######################################## DIALOGO PARCHEGGIO ########################################
     private fun chiediDurataParcheggio(position: LatLng) {
+
         val input = EditText(this)
         input.inputType = InputType.TYPE_CLASS_NUMBER
-        input.hint = "Durata in minuti"
+        input.hint = "Inserisci minuti"
 
         AlertDialog.Builder(this)
             .setTitle("Durata parcheggio")
             .setView(input)
             .setPositiveButton("OK") { _, _ ->
-                val durataStr = input.text.toString()
-                Log.d("DEBUG", "Durata inserita: '$durataStr'")
-                val durata = durataStr.toIntOrNull()
+                val durata = input.text.toString().trim().toIntOrNull()
                 if (durata != null && durata > 0) {
                     googleMap.clear()
                     googleMap.addMarker(
                         MarkerOptions().position(position).title("Parcheggio a tempo")
                     )
-                    programmaNotifica(durata)
+
+                    // Controllo permesso exact alarm
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        val alarmManager = getSystemService(AlarmManager::class.java)
+                        if (!alarmManager.canScheduleExactAlarms()) {
+                            val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                            startActivity(intent)
+                            Toast.makeText(this, "Permesso exact alarm non concesso. Apri le impostazioni.", Toast.LENGTH_LONG).show()
+                            return@setPositiveButton
+                        }
+                    }
+
+                    try {
+                        programmaNotifica(durata)
+                        Toast.makeText(this, "Notifica programmata tra $durata minuti", Toast.LENGTH_SHORT).show()
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            Toast.makeText(this, getString(R.string.posizione_salvata), Toast.LENGTH_SHORT).show()
+                        }, 2000)
+                    } catch (e: Exception) {
+                        Toast.makeText(this, "Errore nel programmare la notifica: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
                 } else {
-                    Toast.makeText(this, "Inserisci un valore valido", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Valore inserito non valido: $durata", Toast.LENGTH_SHORT).show()
                 }
             }
             .setNegativeButton("Annulla", null)
             .show()
     }
 
+
+
+
     private fun programmaNotifica(minuti: Int) {
         val intent = Intent(this, NotificaReceiver::class.java)
         val pendingIntent = PendingIntent.getBroadcast(
             this,
-            0,
+            System.currentTimeMillis().toInt(), // requestCode unico
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val triggerTime = System.currentTimeMillis() + minuti * 60 * 1000
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
+        val triggerTime = System.currentTimeMillis() + 1000L * 60 * minuti
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
     }
 
-    class NotificaReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            val notificationManager =
-                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val channel = NotificationChannel(
-                    "parking_channel",
-                    "Parcheggio",
-                    NotificationManager.IMPORTANCE_HIGH
-                )
-                notificationManager.createNotificationChannel(channel)
-            }
-
-            val notification = NotificationCompat.Builder(context, "parking_channel")
-                .setContentTitle("Parcheggio in scadenza")
-                .setContentText("Il tuo parcheggio a tempo sta per scadere!")
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
-                .build()
-
-            notificationManager.notify(1, notification)
-        }
-    }
 
     // ######################################## POPUP LINGUE ########################################
     private fun showLanguagePopup(anchorView: View) {
@@ -243,6 +256,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         setLocale(languageCode)
         recreate()
     }
+
 
     // ######################################## FULLSCREEN SEMPRE ATTIVO ########################################
     override fun onWindowFocusChanged(hasFocus: Boolean) {
