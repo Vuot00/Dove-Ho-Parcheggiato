@@ -13,7 +13,7 @@ class NotificaReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val channelId = "parking_channel"
-        val channelName = "Parcheggio"
+        val channelName = context.getString(R.string.parcheggio)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
@@ -21,8 +21,8 @@ class NotificaReceiver : BroadcastReceiver() {
         }
 
         val notification = NotificationCompat.Builder(context, channelId)
-            .setContentTitle("Parcheggio in scadenza")
-            .setContentText("Notifica di test funzionante!")
+            .setContentTitle(context.getString(R.string.parcheggio_in_scadenza))
+            .setContentText(context.getString(R.string.notifica_funzionante))
             .setSmallIcon(android.R.drawable.ic_dialog_info) // usa questa icona di sistema
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()

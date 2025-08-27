@@ -14,6 +14,28 @@
     <string name="cambia_lingua">Cambiar idioma</string>
     <string name="giroscopio">Giroscopio</string>
     <string name="info"> Information</string>
-    <string name="informzaioni"> Information</string>
+    <string name="informazioni"> Information</string>
+    <string name="gyro_abilitato">Gyro habilitado</string>
+    <string name="gyro_disasabilitato">Gyro deshabilitado</string>
+    <string name="inserisci_minuti">Inserta minutos</string>
+    <string name="durata_parcheggio">Duración del estacionamiento</string>
+    <string name="parcheggio_a_tempo">Estacionamiento a tiempo</string>
+    <string name="permesso_notifica">Permiso exact alarm no concedido. Abrir configuración</string>
+    <string name="notifica_programmata">Recibir una notificación en %d minutos</string>
+    <string name="errore_notifica">Error al programar la notificación: %s</string>
+    <string name="notifica_ricevuta">Notificación recibida</string>
+    <string name="valore_invalido">Valor insertado no válido: %d</string>
+    <string name="annulla">Cancelar</string>
+    <string name="impossibile_ottenere_posizione_attuale">Imposible obtener la posición actual</string>
+    <string name="portami_all_auto">Portami al coche</string>
+    <string name="parcheggio_a_tempo_domanda">Estacionamiento a tiempo?</string>
+    <string name="si">Sí</string>
+    <string name="domanda_dialogo">¿Quieres guardar este estacionamiento como temporario?</string>
+    <string name="parcheggio_scaduto">Tu estacionamiento ha expirado</string>
+    <string name="parcheggio_in_scadenza">Tu estacionamiento está a punto de expirar</string>
+    <string name="notifica_funzionante">Llegar a tu coche!</string>
+    <string name="parcheggio">Estacionamiento</string>
+
+
 
 </resources>

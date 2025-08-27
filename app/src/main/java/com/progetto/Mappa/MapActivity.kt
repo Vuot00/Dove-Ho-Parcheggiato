@@ -111,9 +111,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
                     // Mostra un dialogo di scelta
                     AlertDialog.Builder(this)
-                        .setTitle("Parcheggio a tempo?")
-                        .setMessage("Vuoi salvare questo parcheggio come temporaneo?")
-                        .setPositiveButton("Sì") { _, _ ->
+                        .setTitle(getString(R.string.parcheggio_a_tempo_domanda))
+                        .setMessage(getString(R.string.domanda_dialogo))
+                        .setPositiveButton(getString(R.string.si)) { _, _ ->
                             chiediDurataParcheggio(currentLatLng)
                         }
                         .setNegativeButton("No") { _, _ ->
@@ -180,10 +180,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 rotationSensor?.also { sensor ->
                     sensorManager.registerListener(rotationListener, sensor, SensorManager.SENSOR_DELAY_UI)
                 }
-                Toast.makeText(this, "Gyro abilitato", Toast.LENGTH_SHORT).show()
-            } else {
+                Toast.makeText(this, getString(R.string.gyro_abilitato), Toast.LENGTH_SHORT).show()            } else {
                 sensorManager.unregisterListener(rotationListener)
-                Toast.makeText(this, "Gyro disabilitato", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.gyro_disasabilitato), Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -222,17 +221,17 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
         val input = EditText(this)
         input.inputType = InputType.TYPE_CLASS_NUMBER
-        input.hint = "Inserisci minuti"
+        input.hint = getString(R.string.inserisci_minuti)
 
         AlertDialog.Builder(this)
-            .setTitle("Durata parcheggio")
+            .setTitle(getString(R.string.durata_parcheggio))
             .setView(input)
             .setPositiveButton("OK") { _, _ ->
                 val durata = input.text.toString().trim().toIntOrNull()
                 if (durata != null && durata > 0) {
                     googleMap.clear()
                     googleMap.addMarker(
-                        MarkerOptions().position(position).title("Parcheggio a tempo")
+                        MarkerOptions().position(position).title(getString(R.string.parcheggio_a_tempo))
                     )
 
                     // Controllo permesso exact alarm
@@ -241,25 +240,24 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                         if (!alarmManager.canScheduleExactAlarms()) {
                             val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
                             startActivity(intent)
-                            Toast.makeText(this, "Permesso exact alarm non concesso. Apri le impostazioni.", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this, getString(R.string.permesso_notifica), Toast.LENGTH_LONG).show()
                             return@setPositiveButton
                         }
                     }
 
                     try {
                         programmaNotifica(durata)
-                        Toast.makeText(this, "Notifica programmata tra $durata minuti", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, getString(R.string.notifica_programmata, durata), Toast.LENGTH_SHORT).show()
                         Handler(Looper.getMainLooper()).postDelayed({
                             Toast.makeText(this, getString(R.string.posizione_salvata), Toast.LENGTH_SHORT).show()
                         }, 2000)
                     } catch (e: Exception) {
-                        Toast.makeText(this, "Errore nel programmare la notifica: ${e.message}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, getString(R.string.notifica_programmata, durata), Toast.LENGTH_SHORT).show()
                     }
                 } else {
-                    Toast.makeText(this, "Valore inserito non valido: $durata", Toast.LENGTH_SHORT).show()
-                }
+                    Toast.makeText(this, getString(R.string.valore_invalido, durata), Toast.LENGTH_SHORT).show()                }
             }
-            .setNegativeButton("Annulla", null)
+            .setNegativeButton(getString(R.string.annulla), null)
             .show()
     }
 
@@ -341,6 +339,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         googleMap.isMyLocationEnabled = true
         googleMap.uiSettings.isCompassEnabled = false
         googleMap.uiSettings.isRotateGesturesEnabled = true
+        googleMap.uiSettings.isMapToolbarEnabled = false
+
+
 
         centerMapOnUserLocation()
 
@@ -384,7 +385,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                         }
                     }
                 } else {
-                    Toast.makeText(this, "Impossibile ottenere la posizione attuale", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.impossibile_ottenere_posizione_attuale), Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -448,11 +449,15 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             val view = LayoutInflater.from(context).inflate(R.layout.custom_info_window, null)
             val title = view.findViewById<TextView>(R.id.title)
             val button = view.findViewById<Button>(R.id.btn_action)
-            title.text = marker.title
-            button.text = "Portami all'auto"
+
+            title.text = marker.title ?: context.getString(R.string.auto_parcheggiata)
+            button.text = context.getString(R.string.portami_all_auto)
+
+
             return view
         }
 
         override fun getInfoWindow(marker: Marker): View? = null
     }
+
 }

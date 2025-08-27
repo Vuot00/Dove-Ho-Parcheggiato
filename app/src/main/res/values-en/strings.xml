@@ -14,5 +14,25 @@
     <string name="cambia_lingua">Change language</string>
     <string name="giroscopio">Gyroscope</string>
     <string name="info">Information</string>
-    <string name="informzaioni">Information</string>
+    <string name="informazioni">Information</string>
+    <string name="gyro_abilitato">Gyroscope enabled</string>
+    <string name="gyro_disasabilitato">Gyroscope disabled</string>
+    <string name="inserisci_minuti">Insert minutes</string>
+    <string name="durata_parcheggio">Parking duration</string>
+    <string name="parcheggio_a_tempo">Temporary parking</string>
+    <string name="permesso_notifica">Exact alarm permission not granted. Open settings.</string>
+    <string name="notifica_programmata">Receive a notification in %d minutes</string>
+    <string name="errore_notifica">Error while scheduling notification : %s</string>
+    <string name="notifica_ricevuta">Notification received</string>
+    <string name="valore_invalido">Invalid value inserted: %d</string>
+    <string name="annulla">Cancel</string>
+    <string name="impossibile_ottenere_posizione_attuale">Unable to get current position</string>
+    <string name="portami_all_auto">Go to car</string>
+    <string name="parcheggio_a_tempo_domanda">Temporary parking?</string>
+    <string name="si">Yes</string>
+    <string name="domanda_dialogo">Do you want to save this parking as a temporary one?</string>
+    <string name="parcheggio_scaduto">Your parking has expired</string>
+    <string name="parcheggio_in_scadenza">Your parking is about to expire</string>
+    <string name="notifica_funzionante"> Reach your car!</string>
+    <string name="parcheggio">Parking</string>
 </resources>
