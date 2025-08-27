@@ -7,6 +7,10 @@ import android.content.*
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Build
 import android.os.Bundle
 import android.text.InputType
@@ -33,13 +37,15 @@ import android.provider.Settings
 import android.os.Handler
 import android.os.Looper
 
-
-
 class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     // ######################################## VARIABILI ########################################
     private lateinit var googleMap: GoogleMap
     private lateinit var db: AppDatabase
+    private lateinit var sensorManager: SensorManager
+    private var rotationSensor: Sensor? = null
+    private var gyroEnabled = false
+
 
     private val fusedLocationClient by lazy {
         LocationServices.getFusedLocationProviderClient(this)
@@ -66,6 +72,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(R.layout.activity_map)
         supportActionBar?.hide()
         hideSystemUI()
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        rotationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
@@ -132,7 +141,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         // ######################################## MENU LATERALE ########################################
         val isDarkTheme = resources.configuration.uiMode and
                 Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+
         val drawerLayout = findViewById<DrawerLayout>(R.id.drawer_layout)
+
         val navigationView = findViewById<NavigationView>(R.id.navigation_view)
         navigationView.setBackgroundColor(
             if (isDarkTheme) Color.parseColor("#162340") else Color.WHITE
@@ -162,10 +173,49 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         // GESTIONE SWITCH
         val toggleItem = navigationView.menu.findItem(R.id.voice_toggle_option)
         val toggleSwitch = toggleItem.actionView?.findViewById<Switch>(R.id.nav_switch)
+
         toggleSwitch?.setOnCheckedChangeListener { _, isChecked ->
-            Toast.makeText(this, if (isChecked) "Attivato" else "Disattivato", Toast.LENGTH_SHORT).show()
+            gyroEnabled = isChecked
+            if (isChecked) {
+                rotationSensor?.also { sensor ->
+                    sensorManager.registerListener(rotationListener, sensor, SensorManager.SENSOR_DELAY_UI)
+                }
+                Toast.makeText(this, "Gyro abilitato", Toast.LENGTH_SHORT).show()
+            } else {
+                sensorManager.unregisterListener(rotationListener)
+                Toast.makeText(this, "Gyro disabilitato", Toast.LENGTH_SHORT).show()
+            }
         }
+
     }
+
+    private val rotationListener = object : SensorEventListener {
+        override fun onSensorChanged(event: SensorEvent) {
+            if (!gyroEnabled) return
+
+            val rotationMatrix = FloatArray(9)
+            SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
+
+            val orientationAngles = FloatArray(3)
+            SensorManager.getOrientation(rotationMatrix, orientationAngles)
+
+            val azimuth = Math.toDegrees(orientationAngles[0].toDouble()).toFloat()
+
+            googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(
+                CameraPosition.Builder(googleMap.cameraPosition)
+                    .bearing(azimuth)
+                    .build()
+            ))
+        }
+
+        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+    }
+
+    override fun onPause() {
+        super.onPause()
+        sensorManager.unregisterListener(rotationListener)
+    }
+
 
     // ######################################## DIALOGO PARCHEGGIO ########################################
     private fun chiediDurataParcheggio(position: LatLng) {
@@ -309,7 +359,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                             val response = RetrofitInstance.directionsApi.getDirections(
                                 origin = origin,
                                 destination = destination,
-                                apiKey = "YOUR_API_KEY"
+                                apiKey = "AIzaSyACCZa1bZWIwXEudrPwyC9DLYLtZR9VJB0"
                             )
 
                             if (response.isSuccessful) {
