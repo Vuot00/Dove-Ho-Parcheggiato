@@ -14,7 +14,9 @@
     <string name="cambia_lingua">Cambia lingua 🌍</string>
     <string name="giroscopio">Giroscopio 🧭</string>
     <string name="info"> Info ℹ️</string>
-    <string name="informazioni"> Info</string>
+    <string name="informazioni">
+        Versione: 1.0.0
+        \nAutori:Tonino e Vuoto</string>
     <string name="gyro_abilitato">Gyro abilitato</string>
     <string name="gyro_disasabilitato">Gyro disabilitato</string>
     <string name="inserisci_minuti">Inserisci minuti</string>

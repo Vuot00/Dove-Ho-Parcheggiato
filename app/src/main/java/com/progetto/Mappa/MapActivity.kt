@@ -156,7 +156,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         navigationView.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.voice_about -> {
-                    Toast.makeText(this, "da tradurre", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.informazioni), Toast.LENGTH_SHORT).show()
                     true
                 }
                 R.id.voice_language -> {
@@ -282,15 +282,15 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     // ######################################## POPUP LINGUE ########################################
     private fun showLanguagePopup(anchorView: View) {
         val popup = PopupMenu(this, anchorView)
-        popup.menu.add("Italiano")
-        popup.menu.add("English")
-        popup.menu.add("Español")
+        popup.menu.add("🇮🇹 Italiano")
+        popup.menu.add("🇬🇧 English")
+        popup.menu.add("🇪🇸 Español")
 
         popup.setOnMenuItemClickListener { item ->
             when (item.title) {
-                "Italiano" -> changeAppLanguage("it")
-                "English" -> changeAppLanguage("en")
-                "Español" -> changeAppLanguage("es")
+                "🇮🇹 Italiano" -> changeAppLanguage("it")
+                "🇬🇧 English" -> changeAppLanguage("en")
+                "🇪🇸 Español"-> changeAppLanguage("es")
             }
             true
         }
