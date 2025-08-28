@@ -11,9 +11,9 @@
     <string name="auto_parcheggiata">Coche parchejado!</string>
     <string name="apri_impostazioni">Abrir configuración</string>
     <string name="concedi_permesso">Concedi permiso</string>
-    <string name="cambia_lingua">Cambiar idioma</string>
-    <string name="giroscopio">Giroscopio</string>
-    <string name="info"> Information</string>
+    <string name="cambia_lingua">Cambiar idioma 🌍</string>
+    <string name="giroscopio">Giroscopio 🧭</string>
+    <string name="info"> Information ℹ️</string>
     <string name="informazioni"> Information</string>
     <string name="gyro_abilitato">Gyro habilitado</string>
     <string name="gyro_disasabilitato">Gyro deshabilitado</string>

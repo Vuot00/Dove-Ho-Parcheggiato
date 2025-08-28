@@ -11,9 +11,9 @@
     <string name="auto_parcheggiata">Parked car!</string>
     <string name="apri_impostazioni">Open settings</string>
     <string name="concedi_permesso">Grant permission</string>
-    <string name="cambia_lingua">Change language</string>
-    <string name="giroscopio">Gyroscope</string>
-    <string name="info">Information</string>
+    <string name="cambia_lingua">Change language 🌍</string>
+    <string name="giroscopio">Gyroscope 🧭</string>
+    <string name="info">Information ℹ️</string>
     <string name="informazioni">Information</string>
     <string name="gyro_abilitato">Gyroscope enabled</string>
     <string name="gyro_disasabilitato">Gyroscope disabled</string>
