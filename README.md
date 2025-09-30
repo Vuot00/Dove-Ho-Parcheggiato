@@ -22,7 +22,7 @@
 - Minimum SDK: Android 5.0 (API 21)
 - Target SDK: Android 14 (API 34)
 
-# Librerie Principali
+## Librerie Principali
 
 - Google Maps Android API: Visualizzazione mappa e marker
 - Google Directions API: Calcolo percorsi pedonali
