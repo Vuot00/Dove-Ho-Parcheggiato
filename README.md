@@ -40,4 +40,4 @@
 
 ## Autori:
 - D'Angelo Francesco
-- Giurranna Antonio Pio
+- Giurranna Antoniopio
