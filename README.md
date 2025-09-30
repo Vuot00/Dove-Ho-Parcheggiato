@@ -1,5 +1,5 @@
 # 🚗 Dove ho Parcheggiato
-## 📋 Descrizione
+
 "Dove ho Parcheggiato" è un'applicazione Android sviluppata in Kotlin che implementa la funzionalità di salvataggio parcheggio. L'app utilizza la posizione GPS del dispositivo per memorizzare dove hai parcheggiato e ti aiuta a ritrovare la tua auto con indicazioni dettagliate sulla mappa.
 
 ## ✨ Funzionalità Principali
